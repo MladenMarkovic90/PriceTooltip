@@ -1,0 +1,12 @@
+## APIVersion: 100025
+## Title: Price Tooltip
+## Version: 1.1
+## Author: Mladen90
+## Description: Additional tooltips for price (works with MM, TTC, ATT)
+## DependsOn: LibAddonMenu-2.0 LibCustomMenu LibStub
+## SavedVariables: PriceTooltip_Settings_2
+
+PriceTooltip.lua
+PriceTooltip_Default.lua
+PriceTooltip_Globals.lua
+PriceTooltip_Menu.lua
