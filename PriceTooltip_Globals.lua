@@ -1,5 +1,5 @@
 PriceTooltip.Version = 1
-PriceTooltip.StringVersion = "1.1"
+PriceTooltip.StringVersion = "1.1.1b"
 PriceTooltip.AddOnName = "PriceTooltip"
 PriceTooltip.SavedVariablesFileName = "PriceTooltip_Settings_2"
 

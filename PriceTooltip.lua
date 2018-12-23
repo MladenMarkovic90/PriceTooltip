@@ -135,8 +135,8 @@ PriceTooltip_GetPrices = function(itemLink)
 		prices.bestPrice = 0
 
 		if PriceTooltip.SavedVariables.UseTTCPrice and PriceTooltip_ValidPrice(prices.scaledTTCPrice) and prices.scaledTTCPrice > prices.bestPrice then
-				prices.bestPrice = prices.scaledTTCPrice
-				prices.bestPriceText = PRICE_TOOLTIP_TTC_PRICE
+			prices.bestPrice = prices.scaledTTCPrice
+			prices.bestPriceText = PRICE_TOOLTIP_TTC_PRICE
 		end
 		if PriceTooltip.SavedVariables.UseMMPrice and PriceTooltip_ValidPrice(prices.scaledMMPrice) and prices.scaledMMPrice > prices.bestPrice then
 			prices.bestPrice = prices.scaledMMPrice
@@ -196,22 +196,38 @@ PriceTooltip_AddTooltip = function(control, itemLink)
 		control:AddLine("ATT not available!", PriceTooltip.SavedVariables.Font, 1, 0, 0, CENTER, MODIFY_TEXT_TYPE_UPPERCASE, LEFT, false)
 	end
 
-	if PriceTooltip.SavedVariables.DisplayProfitPrice then PriceTooltip_AddLine(control, PRICE_TOOLTIP_PROFIT_PRICE, prices.profitPrice) end
-	if PriceTooltip.SavedVariables.DisplayTTCPrice then PriceTooltip_AddLine(control, PRICE_TOOLTIP_TTC_PRICE, prices.scaledTTCPrice) end
-	if PriceTooltip.SavedVariables.DisplayMMPrice then PriceTooltip_AddLine(control, PRICE_TOOLTIP_MM_PRICE, prices.scaledMMPrice) end
-	if PriceTooltip.SavedVariables.DisplayATTPrice then PriceTooltip_AddLine(control, PRICE_TOOLTIP_ATT_PRICE, prices.scaledATTPrice) end
-	if PriceTooltip.SavedVariables.DisplayAveragePrice then PriceTooltip_AddLine(control, PRICE_TOOLTIP_TRADE_PRICE, prices.scaledAveragePrice) end
-	if PriceTooltip.SavedVariables.DisplayBestPrice then PriceTooltip_AddLine(control, PRICE_TOOLTIP_BEST_PRICE, prices.bestPrice, prices.bestPriceText) end
+	if PriceTooltip.SavedVariables.DisplayProfitPrice then PriceTooltip_AddTooltipLine(control, PRICE_TOOLTIP_PROFIT_PRICE, prices.profitPrice, prices.vendorPrice, prices.profitPrice) end
+	if PriceTooltip.SavedVariables.DisplayTTCPrice then PriceTooltip_AddTooltipLine(control, PRICE_TOOLTIP_TTC_PRICE, prices.scaledTTCPrice, prices.vendorPrice, prices.profitPrice) end
+	if PriceTooltip.SavedVariables.DisplayMMPrice then PriceTooltip_AddTooltipLine(control, PRICE_TOOLTIP_MM_PRICE, prices.scaledMMPrice, prices.vendorPrice, prices.profitPrice) end
+	if PriceTooltip.SavedVariables.DisplayATTPrice then PriceTooltip_AddTooltipLine(control, PRICE_TOOLTIP_ATT_PRICE, prices.scaledATTPrice, prices.vendorPrice, prices.profitPrice) end
+	if PriceTooltip.SavedVariables.DisplayAveragePrice then PriceTooltip_AddTooltipLine(control, PRICE_TOOLTIP_TRADE_PRICE, prices.scaledAveragePrice, prices.vendorPrice, prices.profitPrice) end
+	if PriceTooltip.SavedVariables.DisplayBestPrice then PriceTooltip_AddTooltipLine(control, PRICE_TOOLTIP_BEST_PRICE, prices.bestPrice, prices.vendorPrice, prices.profitPrice, prices.bestPriceText) end
 end
 
 
-PriceTooltip_AddLine = function(control, text, price, info)
-	if not info then info = ""
-	else info = " (" .. info .. ")"
-	end
+PriceTooltip_GetLowPriceIndicator = function(price, vendorPrice, profitPrice)
+	local lowPriceIndikator = ""
 
 	if PriceTooltip_ValidPrice(price) then
-		control:AddLine(text .. " " .. PriceTooltip_NumberFormat(price, 2) .. PRICE_TOOLTIP_GOLD_TEXT_ICON .. info, PriceTooltip.SavedVariables.Font, PriceTooltip.SavedVariables.TooltipColor.Red, PriceTooltip.SavedVariables.TooltipColor.Green, PriceTooltip.SavedVariables.TooltipColor.Blue, CENTER, MODIFY_TEXT_TYPE_UPPERCASE, LEFT, false)
+		if price <= vendorPrice then lowPriceIndikator = PriceTooltip_GetStringColor(1, 0, 0) .. "*"
+		elseif PriceTooltip.SavedVariables.UseProfitPrice and price < profitPrice then lowPriceIndikator = PriceTooltip_GetStringColor(1, 1, 0) .. "*"
+		end
+	end
+
+	return lowPriceIndikator
+end
+
+PriceTooltip_AddTooltipLine = function(control, text, price, vendorPrice, profitPrice, info)
+	if PriceTooltip_ValidPrice(price) then
+		if not info then info = ""
+		else info = " (" .. info .. ")"
+		end
+
+		local lowPriceIndicator = ""
+		if PriceTooltip.SavedVariables.LowPriceIndicatorTooltip then lowPriceIndicator = PriceTooltip_GetLowPriceIndicator(price, vendorPrice, profitPrice) end
+
+		local stringColor = PriceTooltip_GetStringColorFromColor(PriceTooltip.SavedVariables.TooltipColor)
+		control:AddLine(stringColor .. text .. " " .. lowPriceIndicator .. stringColor .. PriceTooltip_NumberFormat(price, 2) .. PRICE_TOOLTIP_GOLD_TEXT_ICON .. info, PriceTooltip.SavedVariables.Font, 1, 1, 1, CENTER, MODIFY_TEXT_TYPE_UPPERCASE, LEFT, false)
 	end
 end
 
@@ -271,8 +287,6 @@ PriceTooltip_ChangeGridPrice = function(control, slot)
 		local sellPriceControl = mainControl:GetNamedChild("SellPrice")
 
 		if not sellPriceControl then return end
-
-		local stringColor = PriceTooltip_GetStringColorFromColor(PriceTooltip.SavedVariables.GridPriceColor)
 		
 		local price = nil
 
@@ -283,15 +297,18 @@ PriceTooltip_ChangeGridPrice = function(control, slot)
 		elseif PriceTooltip.SavedVariables.OverrideBehaviour == PRICE_TOOLTIP_BEST_PRICE then price = prices.bestPrice
 		elseif PriceTooltip.SavedVariables.OverrideBehaviour == PRICE_TOOLTIP_PROFIT_PRICE then price = prices.profitPrice
 		end
+		
+		local lowPriceIndikator = ""
+		if PriceTooltip.SavedVariables.LowPriceIndicatorGrid then lowPriceIndikator = PriceTooltip_GetLowPriceIndicator(price, prices.vendorPrice, prices.profitPrice) end
 
 		if not PriceTooltip_ValidPrice(price) then price = prices.vendorPrice end
 
 		local stackPrice = PriceTooltip_Round(price * stackCount)
 
 		if price == prices.vendorPrice then
-			sellPriceControl:SetText(PriceTooltip_NumberFormat(stackPrice) .. PRICE_TOOLTIP_GOLD_TEXT_ICON)
+			sellPriceControl:SetText(lowPriceIndikator .. PriceTooltip_GetStringColor(1, 1, 1) .. PriceTooltip_NumberFormat(stackPrice) .. PRICE_TOOLTIP_GOLD_TEXT_ICON)
 		else
-			sellPriceControl:SetText(stringColor .. PriceTooltip_NumberFormat(stackPrice) .. PRICE_TOOLTIP_GOLD_TEXT_ICON)
+			sellPriceControl:SetText(lowPriceIndikator .. PriceTooltip_GetStringColorFromColor(PriceTooltip.SavedVariables.GridPriceColor) .. PriceTooltip_NumberFormat(stackPrice) .. PRICE_TOOLTIP_GOLD_TEXT_ICON)
 		end
 	end
 end
@@ -336,14 +353,14 @@ end
 
 
 PriceTooltip_AddCustomMenuItems = function(link, button)
-		if not (link and button == MOUSE_BUTTON_INDEX_RIGHT) then return end
+		if not (PriceTooltip.SavedVariables.UsePriceToChat and link and button == MOUSE_BUTTON_INDEX_RIGHT) then return end
 
 		local prices = PriceTooltip_GetPrices(link)
 
 		local count = 1
 		local entries = {}
 
-		local stringColor = PriceTooltip_GetStringColor(1, 1, 0)
+		local stringColor = PriceTooltip_GetStringColorFromColor(PriceTooltip.SavedVariables.PriceToChatColor)
 
 		if PriceTooltip_ValidPrice(prices.originalTTCPrice) then
 			entries[count] = 
@@ -383,7 +400,7 @@ PriceTooltip_AddCustomMenuItems = function(link, button)
 		end
 
 		if count > 1 then
-			AddCustomSubMenuItem(PriceTooltip_GetStringColorFromColor(PriceTooltip.SavedVariables.TooltipColor) .. "PT original price to chat", entries)
+			AddCustomSubMenuItem(stringColor .. "PT original price to chat", entries)
 			ShowMenu()
 		end
 end
@@ -398,18 +415,14 @@ PriceTooltip_LinkHandlerExtension = function()
 end
 
 
-PriceTooltip_ShowContextMenuExtension = function()
-	local base = ZO_InventorySlot_ShowContextMenu
-	ZO_InventorySlot_ShowContextMenu = function(inventorySlot)
-		base(inventorySlot)
-		local valid = ZO_Inventory_GetBagAndIndex(inventorySlot)
-		if not valid then return end
-		local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
-		if not (bagId and slotIndex) then return end
-		local itemLink = GetItemLink(bagId, slotIndex)
-		if not itemLink then return end
-		PriceTooltip_AddCustomMenuItems(itemLink, MOUSE_BUTTON_INDEX_RIGHT)
-	end
+PriceTooltip_ShowContextMenuExtension = function(inventorySlot)
+	local valid = ZO_Inventory_GetBagAndIndex(inventorySlot)
+	if not valid then return end
+	local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+	if not (bagId and slotIndex) then return end
+	local itemLink = GetItemLink(bagId, slotIndex)
+	if not itemLink then return end
+	PriceTooltip_AddCustomMenuItems(itemLink, MOUSE_BUTTON_INDEX_RIGHT)
 end
 
 
@@ -439,7 +452,7 @@ PriceTooltip_Load = function(eventCode, addonName)
 		if PriceTooltip.SavedVariables.Color then
 			PriceTooltip.SavedVariables.TooltipColor.Red = PriceTooltip.SavedVariables.Color.Red
 			PriceTooltip.SavedVariables.TooltipColor.Green = PriceTooltip.SavedVariables.Color.Green
-			PriceTooltip.SavedVariables.TooltipColor.Red = PriceTooltip.SavedVariables.Color.Red
+			PriceTooltip.SavedVariables.TooltipColor.Blue = PriceTooltip.SavedVariables.Color.Blue
 			PriceTooltip.SavedVariables.GridPriceColor.Red = PriceTooltip.SavedVariables.Color.Red
 			PriceTooltip.SavedVariables.GridPriceColor.Green = PriceTooltip.SavedVariables.Color.Green
 			PriceTooltip.SavedVariables.GridPriceColor.Blue = PriceTooltip.SavedVariables.Color.Blue
@@ -455,6 +468,13 @@ PriceTooltip_Load = function(eventCode, addonName)
 		PriceTooltip.SavedVariables.DisplayAveragePrice = PriceTooltip.SavedVariables.UseAveragePrice
 
 		PriceTooltip.SavedVariables.Init.FirstTime_2 = false
+	end
+	
+	if PriceTooltip.SavedVariables.Init.FirstTime_3 then
+		PriceTooltip.SavedVariables.PriceToChatColor.Red = PriceTooltip.SavedVariables.TooltipColor.Red
+		PriceTooltip.SavedVariables.PriceToChatColor.Green = PriceTooltip.SavedVariables.TooltipColor.Green
+		PriceTooltip.SavedVariables.PriceToChatColor.Blue = PriceTooltip.SavedVariables.TooltipColor.Blue
+		PriceTooltip.SavedVariables.Init.FirstTime_3 = false
 	end
 	
 	PriceTooltip_MENU.Init()
@@ -474,7 +494,7 @@ PriceTooltip_Load = function(eventCode, addonName)
 
 	PriceTooltip_GridPriceExtension()
 	PriceTooltip_LinkHandlerExtension()
-	PriceTooltip_ShowContextMenuExtension()
+	ZO_PreHook("ZO_InventorySlot_ShowContextMenu", function(inventorySlot) zo_callLater(function() PriceTooltip_ShowContextMenuExtension(inventorySlot) end, 50) end)
 end
 
 

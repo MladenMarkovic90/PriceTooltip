@@ -1,6 +1,6 @@
 ## APIVersion: 100025
 ## Title: Price Tooltip
-## Version: 1.1
+## Version: 1.1.1b
 ## Author: Mladen90
 ## Description: Additional tooltips for price (works with MM, TTC, ATT)
 ## DependsOn: LibAddonMenu-2.0 LibCustomMenu LibStub

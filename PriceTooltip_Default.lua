@@ -3,7 +3,8 @@ PriceTooltip.Default =
 	Init				=
 	{
 		FirstTime_1	= true,
-		FirstTime_2	= true
+		FirstTime_2	= true,
+		FirstTime_3	= true
 	},
 	RoundPrice			= false,
 	Separator			= "'",
@@ -13,6 +14,13 @@ PriceTooltip.Default =
 		Red		= 0.58,
 		Green	= 1,
 		Blue	= 0.54
+	},
+	UsePriceToChat		= true,
+	PriceToChatColor	= 
+	{
+		Red		= 1,
+		Green	= 0.83,
+		Blue	= 0
 	},
 	DisplayVendorPrice	= true,
 	UseProfitPrice		= false,
@@ -39,5 +47,7 @@ PriceTooltip.Default =
 		Red		= 0.58,
 		Green	= 1,
 		Blue	= 0.54
-	}
+	},
+	LowPriceIndicatorTooltip = true,
+	LowPriceIndicatorGrid = true
 }

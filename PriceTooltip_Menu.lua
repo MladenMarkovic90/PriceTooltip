@@ -61,6 +61,45 @@ PriceTooltip_MENU.OptionData =
 			PriceTooltip.SavedVariables.TooltipColor.Blue = b
 		end
     },
+	{
+		type = "checkbox",
+		name = "Use low price indicator for tooltip",
+		tooltip = "Shows low price indicator in tooltip, if price is lower or equal vendor price or if price is lower than profit price (if enabled)",
+		width = "half",
+		getFunc = function() return PriceTooltip.SavedVariables.LowPriceIndicatorTooltip end,
+		setFunc = function(newValue) PriceTooltip.SavedVariables.LowPriceIndicatorTooltip = newValue end,
+	},
+	{
+		type = "submenu",
+		name = "Original price to chat menu",
+		controls =
+		{
+			{
+				type = "checkbox",
+				name = "Use price to chat menu",
+				width = "half",
+				getFunc = function() return PriceTooltip.SavedVariables.UsePriceToChat end,
+				setFunc = function(newValue) PriceTooltip.SavedVariables.UsePriceToChat = newValue end
+			},
+			{
+				type = "colorpicker",
+				name = "Price to chat menu color",
+				width = "half",
+				getFunc = function()
+					return
+					PriceTooltip.SavedVariables.PriceToChatColor.Red,
+					PriceTooltip.SavedVariables.PriceToChatColor.Green,
+					PriceTooltip.SavedVariables.PriceToChatColor.Blue
+				end,
+				setFunc = function(r, g, b)
+					PriceTooltip.SavedVariables.PriceToChatColor.Red = r
+					PriceTooltip.SavedVariables.PriceToChatColor.Green = g
+					PriceTooltip.SavedVariables.PriceToChatColor.Blue = b
+				end,
+				disabled = function() return (not PriceTooltip.SavedVariables.UsePriceToChat) end
+			},
+		}
+	},
 	-- Price settings
 	{
 		type = "header",
@@ -312,6 +351,15 @@ PriceTooltip_MENU.OptionData =
 			PriceTooltip.SavedVariables.GridPriceColor.Blue = b
 		end
     },
+	{
+		type = "checkbox",
+		name = "Use low price indicator for grid",
+		tooltip = "Shows low price indicator in grid, if price is lower or equal vendor price or if price is lower than profit price (if enabled)",
+		width = "half",
+		getFunc = function() return PriceTooltip.SavedVariables.LowPriceIndicatorGrid end,
+		setFunc = function(newValue) PriceTooltip.SavedVariables.LowPriceIndicatorGrid = newValue end,
+		disabled = function() return (not PriceTooltip.SavedVariables.OverrideItemPrice) end
+	}
 }
 
 
